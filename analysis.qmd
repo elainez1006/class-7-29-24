@@ -9,7 +9,18 @@ In this table,
 - the outcome would be years of life after the election. 
 - the covariates include sex, party, year, etc.
 - the ID is each candidate.
-- there are no treatments since this table is a predictive model.
+- the treatment is if they win or lose the election
+- the period of time is this century.
+
+Why might validity not hold
+- The preceptor table focused on candidates throughout the US, while we're just focusing on Massachusetts
+- we don't have as much information on candidates who lost
+
+Justice
+- Population table is the data we have and the preceptor table. Includes units (time).
+- Unconfoundedness might not hold. Age of death, which is dependent on covariates, might affect whether the candidate wins or loses
+- representativeness might not hold since we only have the 2 most popular candidates in each state in each year
+- stability. Conditions change over time. 
 ```{r}
 library(tidyverse)
 library(primer.data)
