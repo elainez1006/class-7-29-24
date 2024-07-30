@@ -1,0 +1,15 @@
+---
+title: "Analysis"
+author: "Elaine Zhang"
+format: html
+---
+
+```{r}
+library(tidyverse)
+library(primer.data)
+```
+
+```{r}
+governors
+```
+
