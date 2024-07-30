@@ -3,7 +3,13 @@ title: "Analysis"
 author: "Elaine Zhang"
 format: html
 ---
+A preceptor table includes enough information so that, if none is missing, it is easy to draw the sought conclusion. It includes the ID column, outcome column, covariates, and treatments (if it's a causal model).
 
+In this table, 
+- the outcome would be years of life after the election. 
+- the covariates include sex, party, year, etc.
+- the ID is each candidate.
+- there are no treatments since this table is a predictive model.
 ```{r}
 library(tidyverse)
 library(primer.data)
