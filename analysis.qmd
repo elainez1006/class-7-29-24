@@ -2,31 +2,87 @@
 title: "Analysis"
 author: "Elaine Zhang"
 format: html
+execute: 
+  echo: false
 ---
-A preceptor table includes enough information so that, if none is missing, it is easy to draw the sought conclusion. It includes the ID column, outcome column, covariates, and treatments (if it's a causal model).
 
-In this table, 
-- the outcome would be years of life after the election. 
-- the covariates include sex, party, year, etc.
-- the ID is each candidate.
-- the treatment is if they win or lose the election
-- the period of time is this century.
-
-Why might validity not hold
-- The preceptor table focused on candidates throughout the US, while we're just focusing on Massachusetts
-- we don't have as much information on candidates who lost
-
-Justice
-- Population table is the data we have and the preceptor table. Includes units (time).
-- Unconfoundedness might not hold. Age of death, which is dependent on covariates, might affect whether the candidate wins or loses
-- representativeness might not hold since we only have the 2 most popular candidates in each state in each year
-- stability. Conditions change over time. 
 ```{r}
+#| label: setup
+#| message: false
 library(tidyverse)
 library(primer.data)
+library(brms)
+library(tidybayes)
+library(gtsummary)
 ```
 
 ```{r}
-governors
+#| cache: true
+
+x <- governors |> 
+  select(death_age, election_age, win_margin, party, sex) |> 
+  mutate(treatment = ifelse(win_margin > 0, "win", "lose")) |> 
+  filter(abs(win_margin) < 5) |>
+  drop_na()
+
+fit_elec_1 <- brm(formula = death_age ~ treatment + win_margin + party,
+                  data = x,
+                  family = gaussian(),
+                  refresh = 0,
+                  silent = 2,
+                  seed = 9)
+
 ```
 
+```{r}
+ndata <- tibble(expand_grid(treatment = c("win", "lose"), 
+                            party = c("Democrat", "Republican", "Third party"),
+                            win_margin = 0))
+fit_elec_1 |>
+  add_epred_draws(newdata = ndata) |>
+  ggplot(aes(x = .epred, y = party, fill = treatment))+
+  stat_slab() +
+  labs(title = "Expected Lifespan Given Election Outcome",
+       subtitle = "Winning is associated with about 8 extra years",
+       x = "Expected Lifespan",
+       y = "",
+       fill = "Election Result")
+```
+$$death\_age = \beta_{0} + \beta_{1}treatment_i + \beta_{2}win\_margin_i +\\ \beta_{4}repub_i + \beta_{5}thirdparty_i + \epsilon_{i}$$
+```{r}
+#| warning: false
+
+tbl_regression(fit_elec_1)
+```
+In this data set, I compared the average lifespan of each candidate depending on their party and if they win or lose. However, the data is not entirely representative of the actual population since the data only drew the two most popular candidates, ignoring the lesser-known candidates. In the end, I found that candidates that win elections are expected to live longer than those who lose, living around 3-14 years longer with 95% certainty. 
+
+<!-- A preceptor table includes enough information so that, if none is missing, it is easy to draw the sought conclusion. It includes the ID column, outcome column, covariates, and treatments (if it's a causal model). -->
+
+<!-- In this table,  -->
+<!-- - the outcome would be years of life after the election.  -->
+<!-- - the covariates include sex, party, year, etc. -->
+<!-- - the ID is each candidate. -->
+<!-- - the treatment is if they win or lose the election -->
+<!-- - the period of time is this century. -->
+
+<!-- Why might validity not hold -->
+<!-- - The preceptor table focused on candidates throughout the US, while we're just focusing on Massachusetts -->
+<!-- - we don't have as much information on candidates who lost -->
+
+<!-- Justice -->
+<!-- - Population table is the data we have and the preceptor table. Includes units (time). -->
+<!-- - Unconfoundedness might not hold. Age of death, which is dependent on covariates, might affect whether the candidate wins or loses -->
+<!-- - representativeness might not hold since we only have the 2 most popular candidates in each state in each year -->
+<!-- - stability. Conditions change over time.  -->
+
+<!-- Courage -->
+<!-- - models -->
+<!-- - testing -->
+<!-- - DGM -->
+
+<!-- Temperance -->
+<!-- Variables: Treatment, Party, Win margin -->
+
+<!-- values: party: Democrat -->
+<!--         treatment: win, lose -->
+<!--         win_margin: -->
